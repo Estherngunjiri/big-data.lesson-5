@@ -74,22 +74,22 @@ import plotly.express as px
 import seaborn as sns
 from pandas.plotting import scatter_matrix
 
-df.plot(kind='box',subplots=True,sharex=False,sharey=False)
+data.plot(kind='box',subplots=True,sharex=False,sharey=False)
 plt.show()
 
 
 from sklearn.model_selection import train_test_split
-x_train, x_test, y_train, y_test=train_test_split(df[['Quantity','UnitPrice']],df[['Description']],test_size=0.3,random_state=0)
+x_train, x_test, y_train, y_test=train_test_split(data[['Quantity','UnitPrice']],data[['Description']],test_size=0.3,random_state=0)
 from sklearn import preprocessing
 x_train_norm = preprocessing.normalize(x_train)
 x_test_norm = preprocessing.normalize(x_test)
 from sklearn.cluster import KMeans
-df_3=KMeans(n_clusters = 3,random_state =0,n_init='auto')
-df_3.fit(x_train_norm)
+data_3=KMeans(n_clusters = 3,random_state =0,n_init='auto')
+data_3.fit(x_train_norm)
 sns.scatterplot(df=x_train,x='Quantity',y='UnitPrice',hue=df_3.labels_)
 plt.show()
 from sklearn.metrics import silhouette_score
-perf=(silhouette_score(x_train_norm,df_3.labels_,metric='euclidean'))
+perf=(silhouette_score(x_train_norm,data_3.labels_,metric='euclidean'))
 print(perf)
 '''Testing a number of clusters to determine how many to use'''
 K=range(2,8)
@@ -102,21 +102,10 @@ for k in K:
     score.append(silhouette_score(x_train_norm,model.labels_,metric='euclidean'))
 print(fit)
 print(score)
-'''Visualize the models for k=2,k=4,k=7,k=5'''
-sns.scatterplot(data=x_train,x='Quantity',y='UnitPrice',hue=fit[0].labels_)
-plt.show()
-sns.scatterplot(data=x_train,x='Quantity',y='UnitPrice',hue=fit[2].labels_)
-plt.show()
-sns.scatterplot(data=x_train,x='Quantity',y='UnitPrice',hue=fit[5].labels_)
-plt.show()
-sns.scatterplot(data=x_train,x='Quantity',y='UnitPrice',hue=fit[0].labels_)
-plt.show()
+
 sns.lineplot(x=K,y=score)
 plt.show()
-sns.scatterplot(data=x_train,x='UnitPrice',y='Quantity',hue=fit[3].labels_)
-plt.show()
-sns.boxplot(x=fit[3].labels_, y=y_train['Description'])
-plt.show()
+
 
 
 
