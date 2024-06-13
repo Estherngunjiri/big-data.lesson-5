@@ -73,48 +73,44 @@ import matplotlib.pyplot as plt
 import plotly.express as px
 import seaborn as sns
 from pandas.plotting import scatter_matrix
+df2=data.groupby("StockCode").agg({"Quantity":"sum","UnitPrice":"sum"}).reset_index()
+from sklearn.preprocessing import StandardScaler
+scaler=StandardScaler()
+df_3=scaler.fit_transform(df2[["Quantity","UnitPrice"]])
 
 data.plot(kind='box',subplots=True,sharex=False,sharey=False)
 plt.show()
 
 
-from sklearn.model_selection import train_test_split
-x_train, x_test, y_train, y_test=train_test_split(data[['Quantity','UnitPrice']],data[['Description']],test_size=0.3,random_state=0)
-from sklearn import preprocessing
-x_train_norm = preprocessing.normalize(x_train)
-x_test_norm = preprocessing.normalize(x_test)
+
 from sklearn.cluster import KMeans
-data_3=KMeans(n_clusters = 3,random_state =0,n_init='auto')
-data_3.fit(x_train_norm)
-sns.scatterplot(df=x_train,x='Quantity',y='UnitPrice',hue=df_3.labels_)
-plt.show()
+kmeans=KMeans(n_clusters = 3,random_state =0,n_init='auto')
+kmeans.fit(df_3)
+df2["Clusters"]= kmeans.predict(df_3)
+
 from sklearn.metrics import silhouette_score
-perf=(silhouette_score(x_train_norm,data_3.labels_,metric='euclidean'))
+perf=silhouette_score(df_3,kmeans.labels_,metric="euclidean")
 print(perf)
+
+from sklearn.model_selection import train_test_split
+x_train, x_test, y_train, y_test=train_test_split(data[['Quantity']],data[['UnitPrice']],test_size=0.3,random_state=0)
+
+from sklearn import preprocessing
+x_train_norm = scaler.fit_transform(x_train)
+x_test_norm = scaler.transform(x_test)
+
 '''Testing a number of clusters to determine how many to use'''
 K=range(2,8)
 fit=[]
 score=[]
 for k in K:
     '''Train the model for the current value of k on the training model'''
-    model=KMeans(n_clusters=k,random_state=0,n_init='auto').fit(x_train_norm)
+    model=KMeans(n_clusters=k,random_state=0,n_init='auto').fit(df_3)
     fit.append(model)
-    score.append(silhouette_score(x_train_norm,model.labels_,metric='euclidean'))
+    score.append(silhouette_score(df_3,model.labels_,metric='euclidean'))
 print(fit)
 print(score)
+'''plotting the elbowplot for comparison'''
 
 sns.lineplot(x=K,y=score)
 plt.show()
-
-
-
-
-
-
-
-
-
-
-
-
- 
